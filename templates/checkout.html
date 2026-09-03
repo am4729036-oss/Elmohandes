@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>تفعيل الاشتراك | البشمهندس</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #0f172a; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .checkout-box { background: rgba(30, 41, 59, 0.9); padding: 40px; border-radius: 15px; border: 1px solid #0ea5e9; width: 400px; text-align: center; }
+        .vf-number { background: #e60000; color: white; font-size: 24px; padding: 15px; border-radius: 10px; margin: 20px 0; font-weight: 800; letter-spacing: 2px; }
+        .upload-section { margin-top: 25px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; }
+        input[type="file"] { margin: 15px 0; color: #94a3b8; }
+        .btn { width: 100%; padding: 12px; background: #10b981; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; text-decoration: none; display: block; box-sizing: border-box; font-weight: bold; transition: 0.3s;}
+        .pending-box { background: rgba(245, 158, 11, 0.1); border: 1px solid #f59e0b; padding: 25px 20px; border-radius: 10px; margin-top: 20px; }
+        .pending-box h3 { color: #f59e0b; margin-bottom: 10px; font-size: 22px; }
+        .btn-pending:hover { background: #f59e0b; color: #0f172a !important; }
+    </style>
+</head>
+<body>
+    <div class="checkout-box">
+        <h2 style="color: #0ea5e9;">مرحباً {{ user.name }}!</h2>
+        
+        <!-- لو الطالب رافع إيصال قبل كده، يظهرله رسالة الانتظار وميطلبش منه يرفع تاني -->
+        {% if user.receipt %}
+            <div class="pending-box">
+                <h3>جاري المراجعة ⏳</h3>
+                <p style="color: #cbd5e1; font-size: 15px; line-height: 1.6; margin-bottom: 25px;">
+                    لقد قمت برفع إيصال الدفع مسبقاً بنجاح.<br>
+                    حسابك الآن في انتظار مراجعة وتفعيل الإدارة.
+                </p>
+                <a href="/" class="btn btn-pending" style="background: transparent; border: 2px solid #f59e0b; color: #f59e0b;">العودة للرئيسية</a>
+            </div>
+        {% else %}
+            <p>لفتح دروس الرياضيات، يرجى تحويل قيمة الاشتراك إلى الرقم التالي (فودافون كاش):</p>
+            
+            <div class="vf-number">01061149713</div>
+            
+            <div class="upload-section">
+                <p style="font-size: 14px; color: #cbd5e1;">بعد التحويل، قم برفع صورة الإيصال هنا:</p>
+                <form method="POST" enctype="multipart/form-data"> 
+                    <input type="file" name="receipt" accept="image/*" required>
+                    <button type="submit" class="btn">إرسال الإيصال وتأكيد الدفع</button>
+                </form>
+            </div>
+        {% endif %}
+        
+    </div>
+</body>
+</html>
