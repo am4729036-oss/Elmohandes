@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>الدفع وتفعيل الحساب | البشمهندس</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #0f172a; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .checkout-box { background: rgba(30, 41, 59, 0.8); padding: 40px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 450px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .info-box { background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; padding: 20px; border-radius: 8px; margin-bottom: 25px; }
+        .instructions { background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 8px; font-size: 14px; line-height: 1.8; margin-bottom: 25px; text-align: right; }
+        input[type="file"] { width: 100%; padding: 10px; background: #334155; border-radius: 8px; color: white; margin-bottom: 20px; }
+        .btn { width: 100%; padding: 15px; background: #0ea5e9; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; font-family: 'Cairo', sans-serif; transition: 0.3s; }
+        .btn:hover { background: #0284c7; }
+    </style>
+</head>
+<body>
+    <div class="checkout-box">
+        <h2 style="color: #0ea5e9; margin-top: 0;">مرحباً، {{ user.name }}</h2>
+        <p style="color: #94a3b8; margin-bottom: 20px;">يرجى إتمام الدفع لتفعيل حسابك فوراً.</p>
+
+        <!-- صندوق تفاصيل السعر -->
+        <div class="info-box">
+            <h3 style="margin: 0 0 10px 0; color: #10b981;">تفاصيل الاشتراك</h3>
+            <p style="margin: 0; font-size: 18px;">الصف: <strong>{{ user.grade }}</strong></p>
+            <p style="margin: 10px 0 0 0; font-size: 18px;">المبلغ المطلوب: <strong style="font-size: 24px; color: #38bdf8;">{{ price }} جنيه</strong></p>
+        </div>
+
+        <div class="instructions">
+            <strong style="color: #f59e0b;">طريقة الدفع:</strong><br>
+            1. قم بتحويل المبلغ الموضح أعلاه إلى محفظة فودافون كاش رقم: <strong>01061149713</strong><br>
+            2. التقط صورة (سكرين شوت) لرسالة تأكيد التحويل.<br>
+            3. ارفع الصورة هنا واضغط "إرسال الإيصال".
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            <input type="file" name="receipt" accept="image/*" required>
+            <button type="submit" class="btn">إرسال الإيصال للتفعيل 🚀</button>
+        </form>
+        
+        <br>
+        <a href="/plans" style="color: #94a3b8; font-size: 14px; text-decoration: none;">رجوع لتغيير الخطة</a>
+    </div>
+</body>
+</html>
