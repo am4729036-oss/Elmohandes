@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة البشمهندس | لوحة الدروس</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+    
+    <style>
+        :root { --bg-deep: #030712; --neon-cyan: #00f3ff; --neon-orange: #ff9d00; --glass-bg: rgba(15, 23, 42, 0.6); --glass-border: rgba(0, 243, 255, 0.2); }
+        body { font-family: 'Cairo', sans-serif; background-color: var(--bg-deep); color: white; margin: 0; padding: 0; min-height: 100vh; user-select: none; transition: background-color 0.5s ease; }
+        
+        /* ------------------ وضع السينما والعزل (Cinematic Focus Mode) ------------------ */
+        body.focus-mode { overflow: hidden; /* منع التمرير أثناء العزل */ }
+        
+        /* طبقة الضباب السوداء اللي بتغطي الموقع كله */
+        body.focus-mode::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(3, 7, 18, 0.9); backdrop-filter: blur(20px); z-index: 990;
+        }
+
+        /* إخفاء كل العناصر ما عدا الكارت المعزول */
+        body.focus-mode .navbar, 
+        body.focus-mode .dashboard-header, 
+        body.focus-mode .course-card:not(.isolated-card) { display: none !important; }
+        
+        /* توسيط الكارت المعزول ليكون بحجم سينمائي */
+        body.focus-mode .container {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 999; display: flex; align-items: center; justify-content: center; padding: 0; margin: 0;
+        }
+        
+        body.focus-mode .isolated-card { 
+            width: 85vw; max-width: 1100px; /* حجم سينمائي ممتاز */
+            border: 1px solid var(--neon-cyan); box-shadow: 0 0 60px rgba(0, 243, 255, 0.15); 
+            background: #000; border-radius: 12px; margin: 0; position: relative;
+        }
+        
+        body.focus-mode .isolated-card .course-content { display: none; /* إخفاء النص أسفل الفيديو */ }
+        body.focus-mode .isolated-card .video-container { border: none; border-radius: 12px; }
+        
+        .focus-toggle-btn { position: absolute; top: 15px; right: 15px; z-index: 99; background: rgba(0, 243, 255, 0.1); color: var(--neon-cyan); border: 1px solid var(--neon-cyan); padding: 8px 15px; cursor: pointer; border-radius: 6px; font-weight: bold; text-shadow: 0 0 5px var(--neon-cyan); transition: 0.3s; font-family: 'Cairo'; backdrop-filter: blur(5px); }
+        .focus-toggle-btn:hover { background: var(--neon-cyan); color: #000; box-shadow: 0 0 15px var(--neon-cyan); }
+        
+        /* شكل زرار إلغاء العزل */
+        .isolated-card .focus-toggle-btn { background: rgba(255, 157, 0, 0.1); color: var(--neon-orange); border-color: var(--neon-orange); box-shadow: 0 0 15px rgba(255, 157, 0, 0.4); }
+        /* ------------------------------------------------------------------------------- */
+
+        /* درع التعتيم (Anti-Record) */
+        #anti-record-shield { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 9999999; display: flex; justify-content: center; align-items: center; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+        .shield-active { opacity: 1 !important; pointer-events: all !important; }
+        #anti-record-shield h1 { color: #ef4444; font-size: 40px; text-shadow: 0 0 20px rgba(239, 68, 68, 0.5); }
+        
+        /* نظام الحضور (Anti-AFK) */
+        #attendance-check { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(3, 7, 18, 0.95); backdrop-filter: blur(15px); z-index: 9999998; display: none; }
+        #btn-attendance { position: absolute; background: var(--neon-orange); color: #000; font-family: 'Cairo'; font-weight: 900; font-size: 18px; padding: 15px 30px; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 0 30px var(--neon-orange); animation: pulse 1s infinite alternate; }
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); box-shadow: 0 0 50px var(--neon-orange); } }
+        .countdown-text { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 24px; color: #ef4444; font-weight: bold; text-shadow: 0 0 10px #ef4444; }
+
+        .navbar { background: rgba(3, 7, 18, 0.8); backdrop-filter: blur(10px); padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); position: sticky; top: 0; z-index: 100; box-shadow: 0 0 20px rgba(0, 243, 255, 0.1); }
+        .user-info { display: flex; align-items: center; gap: 15px; }
+        .points-badge { background: transparent; color: var(--neon-orange); padding: 6px 15px; border-radius: 6px; font-weight: bold; border: 1px solid var(--neon-orange); box-shadow: 0 0 10px rgba(255, 157, 0, 0.2) inset; }
+        
+        .progress-container { width: 100%; max-width: 600px; background: rgba(255,255,255,0.05); border-radius: 10px; margin: 20px auto; height: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
+        .progress-bar { height: 100%; background: var(--neon-cyan); box-shadow: 0 0 15px var(--neon-cyan); transition: width 1s ease-in-out; }
+        
+        .dashboard-header { padding: 40px 20px; text-align: center; background: radial-gradient(circle at top, rgba(0, 243, 255, 0.1), transparent 70%); }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .course-card { background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); box-shadow: 0 0 20px rgba(0, 243, 255, 0.05); border-radius: 16px; margin-bottom: 40px; overflow: hidden; display: flex; flex-direction: column; transition: 0.3s; }
+        
+        .video-container { position: relative; width: 100%; background: #000; overflow: hidden; border-bottom: 1px solid var(--glass-border); transition: all 0.5s ease; }
+        :root { --plyr-color-main: #ff9d00; --plyr-video-background: #000; --plyr-menu-background: rgba(3, 7, 18, 0.95); --plyr-menu-color: #fff; }
+        .plyr__video-embed iframe { pointer-events: none !important; }
+
+        .watermark-dynamic { position: absolute; font-size: 16px; color: rgba(255, 255, 255, 0.9); background: rgba(239, 68, 68, 0.5); padding: 5px 15px; border-radius: 6px; font-weight: bold; z-index: 99999; pointer-events: none; transition: all 1s ease-in-out; border: 1px solid #ef4444; text-shadow: 1px 1px 2px #000; }
+        .flashbang-dynamic { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-20deg); font-size: 5vw; font-weight: 900; color: rgba(239, 68, 68, 0.6); text-align: center; z-index: 999999; pointer-events: none; white-space: nowrap; text-shadow: 0 0 30px rgba(0,0,0,0.9); opacity: 0; transition: opacity 0.3s ease; border: 4px dashed rgba(239, 68, 68, 0.4); padding: 20px; }
+
+        .course-content { padding: 30px; }
+        .btn-complete { background: transparent; color: var(--neon-orange); border: 1px solid var(--neon-orange); padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; font-family: 'Cairo'; transition: 0.3s;}
+        .btn-complete:hover:not(:disabled) { background: var(--neon-orange); color: #000; box-shadow: 0 0 20px var(--neon-orange); }
+        .btn-disabled { border-color: #334155 !important; color: #64748b !important; cursor: not-allowed !important; }
+        .btn-completed { background: rgba(0, 243, 255, 0.1); color: var(--neon-cyan); border: 1px solid var(--neon-cyan); padding: 12px; border-radius: 8px; text-align: center; margin-top: 15px; font-weight: bold; }
+
+        .quiz-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 7, 18, 0.9); z-index: 10000; justify-content: center; align-items: center; }
+        .quiz-content { background: var(--glass-bg); padding: 30px; border-radius: 15px; width: 90%; max-width: 500px; text-align: center; border: 1px solid var(--neon-cyan); box-shadow: 0 0 30px rgba(0, 243, 255, 0.2); }
+        .quiz-content label { display: block; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); padding: 15px; margin: 10px 0; border-radius: 8px; cursor: pointer; text-align: right; transition: 0.3s; }
+        .quiz-content label:hover { border-color: var(--neon-cyan); }
+    </style>
+</head>
+<body>
+
+    <div id="attendance-check">
+        <div class="countdown-text" id="countdown-timer">00:15</div>
+        <button id="btn-attendance" onclick="confirmAttendance()">أنا منتبه للمحاضرة ✔️</button>
+    </div>
+
+    <nav class="navbar">
+        <a href="/" class="brand" style="color:var(--neon-cyan); font-size: 24px; font-weight: 900; text-decoration: none;">البشمهندس</a>
+        <div class="user-info">
+            <span class="points-badge">🏆 {{ user.points }} نقطة</span>
+            <a href="/logout" style="color: #ef4444; font-weight: bold; border: 1px solid #ef4444; padding: 5px 15px; border-radius: 6px; text-decoration: none;">خروج</a>
+        </div>
+    </nav>
+
+    <header class="dashboard-header">
+        <h1 style="margin: 0 0 10px 0;">لوحة الدروس</h1>
+        <div style="color: var(--neon-cyan); font-weight: bold;">إنجاز المنهج: {{ progress }}%</div>
+        <div class="progress-container"><div class="progress-bar" id="progress-bar-fill"></div></div>
+        <script>document.getElementById('progress-bar-fill').style.width = "{{ progress }}%";</script>
+    </header>
+
+    <main class="container">
+        
+        <!-- التنبيه المبكر لو فاضل 3 أيام أو أقل على انتهاء الاشتراك -->
+        {% if days_left is defined and days_left >= 0 and days_left <= 3 %}
+        <div style="background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; color: #f59e0b; padding: 15px; border-radius: 10px; margin-bottom: 25px; text-align: center; font-weight: bold; font-size: 16px; box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);">
+            ⚠️ تنبيه هام: سينتهي اشتراكك الحالي بعد ( {{ days_left }} ) أيام. يرجى تجهيز إيصال التجديد لضمان عدم انقطاع الدروس.
+        </div>
+        {% endif %}
+        
+        {% if courses %}
+            {% for course in courses %}
+                <div class="course-card" id="course-card-{{ course.id }}">
+                    <div class="video-container" id="video-container-{{ course.id }}">
+                        
+                        <button class="focus-toggle-btn" id="focus-btn-{{ course.id }}" onclick="toggleFocusMode('course-card-{{ course.id }}')">وضع التركيز 🎧</button>
+                        
+                        <div class="yt-player" id="player-{{ course.id }}" data-url="{{ course.video_url }}"></div>
+                    </div>
+
+                    <div class="course-content">
+                        <h3 style="color: var(--neon-cyan); margin-top: 0;">{{ course.title }}</h3>
+                        <p style="color: #cbd5e1;">{{ course.description }}</p>
+                        
+                        {% if course.id in completed_ids %}
+                            <div class="btn-completed">✅ تم إنجاز الدرس واجتياز الاختبار</div>
+                        {% else %}
+                            <button id="btn-{{ course.id }}" class="btn-complete btn-disabled" disabled onclick="openQuiz('{{ course.id }}')">🔒 يجب مشاهدة الفيديو للنهاية</button>
+                        {% endif %}
+
+                        {% if course.quiz_q %}
+                        <div id="quiz-modal-{{ course.id }}" class="quiz-modal">
+                            <div class="quiz-content">
+                                <h3 style="color: var(--neon-orange);">اختبار سريع ⚡</h3>
+                                <p>{{ course.quiz_q }}</p>
+                                <form action="/submit_quiz/{{ course.id }}" method="POST">
+                                    <label><input type="radio" name="answer" value="1" required> {{ course.quiz_op1 }}</label>
+                                    <label><input type="radio" name="answer" value="2"> {{ course.quiz_op2 }}</label>
+                                    <label><input type="radio" name="answer" value="3"> {{ course.quiz_op3 }}</label>
+                                    <button type="submit" class="btn-complete">تأكيد الإجابة</button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </main>
+
+    <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+
+    <script>
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.onkeydown = function(e) { if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey) || (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0))) return false; };
+
+        let allPlayers = []; 
+
+        function getYouTubeID(url) {
+            if (!url) return null;
+            if (url.length === 11 && !url.includes('http')) return url; 
+            let regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
+            let match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        // ==========================================
+        // 🎯 دالة وضع العزل المخصصة لفيديو واحد فقط (Cinematic Mode)
+        // ==========================================
+        function toggleFocusMode(cardId) {
+            const card = document.getElementById(cardId);
+            const btn = document.getElementById('focus-btn-' + cardId.split('-')[2]);
+
+            document.body.classList.toggle('focus-mode');
+            
+            if (document.body.classList.contains('focus-mode')) {
+                // تفعيل العزل على الكارت المختار فقط وعمل بلور للخلفية
+                card.classList.add('isolated-card');
+                btn.innerHTML = 'إلغاء العزل 🔙';
+            } else {
+                // إلغاء العزل
+                card.classList.remove('isolated-card');
+                btn.innerHTML = 'وضع التركيز 🎧';
+            }
+        }
+        // ==========================================
+
+        function animateInjectedWatermark(wmElement) {
+            const positions = [
+                { top: '10%', right: '5%', left: 'auto', bottom: 'auto', transform: 'none' },
+                { top: '10%', left: '5%', right: 'auto', bottom: 'auto', transform: 'none' },
+                { bottom: '15%', left: '5%', right: 'auto', top: 'auto', transform: 'none' },
+                { bottom: '15%', right: '5%', left: 'auto', top: 'auto', transform: 'none' },
+                { top: '50%', left: '50%', right: 'auto', bottom: 'auto', transform: 'translate(-50%, -50%)' }
+            ];
+            let step = 0;
+            function move() {
+                Object.assign(wmElement.style, positions[step]);
+                let delay = (step === 4) ? 4000 : 8000;
+                step = (step + 1) % positions.length;
+                setTimeout(move, delay);
+            }
+            move();
+        }
+
+        function scheduleInjectedFlashbang(fbElement, playerInstance) {
+            let randomDelay = Math.floor(Math.random() * (120000 - 60000 + 1) + 60000); 
+            setTimeout(() => {
+                if (playerInstance.playing) {
+                    fbElement.style.opacity = '1';
+                    setTimeout(() => { fbElement.style.opacity = '0'; }, 3000);
+                }
+                scheduleInjectedFlashbang(fbElement, playerInstance);
+            }, randomDelay);
+        }
+
+        function openQuiz(courseId) {
+            document.getElementById('quiz-modal-' + courseId).style.display = 'flex';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.yt-player').forEach(function(playerDiv) {
+                let url = playerDiv.getAttribute('data-url');
+                let videoId = getYouTubeID(url);
+                if (!videoId) return;
+                
+                playerDiv.className = 'plyr__video-embed';
+                playerDiv.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?origin=${window.location.origin}&amp;iv_load_policy=3&amp;modestbranding=1&amp;playsinline=1&amp;showinfo=0&amp;rel=0&amp;enablejsapi=1" allowfullscreen allowtransparency allow="autoplay"></iframe>`;
+
+                // 🎬 استرجاع زرار الـ Full Screen الخاص بالمشغل
+                const player = new Plyr(playerDiv, {
+                    controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'captions', 'settings', 'fullscreen'], 
+                    settings: ['captions', 'speed'],
+                    youtube: { noCookie: true, rel: 0, showinfo: 0, iv_load_policy: 3, modestbranding: 1 }
+                });
+
+                allPlayers.push(player);
+
+                // 🛡️ نظام منع التخطي (Anti-Skip)
+                let maxWatchedTime = 0;
+                player.on('timeupdate', () => {
+                    if (player.currentTime > maxWatchedTime + 2) {
+                        player.currentTime = maxWatchedTime;
+                    } else if (player.currentTime > maxWatchedTime) {
+                        maxWatchedTime = player.currentTime;
+                    }
+                });
+                player.on('seeking', () => {
+                    if (player.currentTime > maxWatchedTime + 2) {
+                        player.currentTime = maxWatchedTime;
+                    }
+                });
+
+                player.on('ready', event => {
+                    const plyrContainer = playerDiv.closest('.plyr');
+                    
+                    const wm = document.createElement('div');
+                    wm.className = 'watermark-dynamic';
+                    wm.innerHTML = 'ترخيص حصري: {{ user.name }} | {{ user.phone }}';
+                    plyrContainer.appendChild(wm);
+                    
+                    const fb = document.createElement('div');
+                    fb.className = 'flashbang-dynamic';
+                    fb.innerHTML = 'حساب مسجل باسم<br>{{ user.name }}<br>{{ user.phone }}';
+                    plyrContainer.appendChild(fb);
+
+                    animateInjectedWatermark(wm);
+                    scheduleInjectedFlashbang(fb, player);
+                });
+
+                player.once('play', () => { scheduleNextAttendanceCheck(); });
+
+                player.on('ended', event => {
+                    if (player.currentTime >= player.duration - 3) {
+                        let courseId = playerDiv.id.split('-')[1];
+                        let btn = document.getElementById('btn-' + courseId);
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.classList.remove('btn-disabled');
+                            btn.innerHTML = '📝 إتمام الدرس وبدء الاختبار';
+                        }
+                    }
+                });
+            });
+        });
+
+        // نظام الحضور (Anti-AFK)
+        let attendanceTimer, kickTimeout, countdownInterval;
+
+        function scheduleNextAttendanceCheck() {
+            let randomDelay = Math.floor(Math.random() * (300000 - 120000 + 1) + 120000); 
+            clearTimeout(attendanceTimer);
+            attendanceTimer = setTimeout(triggerAttendanceCheck, randomDelay);
+        }
+
+        function triggerAttendanceCheck() {
+            let isPlaying = allPlayers.some(p => p.playing);
+            if (!isPlaying) { scheduleNextAttendanceCheck(); return; }
+
+            allPlayers.forEach(p => p.pause());
+            const checkScreen = document.getElementById('attendance-check');
+            const btn = document.getElementById('btn-attendance');
+            const timerText = document.getElementById('countdown-timer');
+            
+            btn.style.top = Math.floor(Math.random() * 80) + 10 + '%';
+            btn.style.left = Math.floor(Math.random() * 70) + 10 + '%';
+            checkScreen.style.display = 'block';
+
+            let timeLeft = 15;
+            timerText.innerText = "00:" + timeLeft;
+            countdownInterval = setInterval(() => {
+                timeLeft--;
+                timerText.innerText = "00:" + (timeLeft < 10 ? '0' + timeLeft : timeLeft);
+                if(timeLeft <= 0) clearInterval(countdownInterval);
+            }, 1000);
+
+            kickTimeout = setTimeout(() => { window.location.href = '/logout'; }, 15000);
+        }
+
+        function confirmAttendance() {
+            clearTimeout(kickTimeout);
+            clearInterval(countdownInterval);
+            document.getElementById('attendance-check').style.display = 'none';
+            allPlayers.forEach(p => p.play()); 
+            scheduleNextAttendanceCheck();
+        }
+    </script>
+</body>
+</html>

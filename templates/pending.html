@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>جاري التفعيل | البشمهندس</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #0f172a; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .pending-box { background: rgba(30, 41, 59, 0.8); padding: 40px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 450px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .icon { font-size: 60px; margin-bottom: 20px; display: block; }
+        h2 { color: #f59e0b; margin-top: 0; }
+        p { color: #cbd5e1; font-size: 16px; line-height: 1.6; }
+        .btn { display: inline-block; padding: 12px 30px; background: #334155; color: white; text-decoration: none; border-radius: 8px; font-size: 15px; font-weight: bold; margin-top: 20px; transition: 0.3s; }
+        .btn:hover { background: #475569; }
+    </style>
+</head>
+<body>
+    <div class="pending-box">
+        <span class="icon">⏳</span>
+        <h2>حسابك قيد المراجعة</h2>
+        <p>مرحباً يا <strong>{{ user.name }}</strong></p>
+        <p>لقد استلمنا إيصال الدفع الخاص بك بنجاح، وجاري مراجعته من قبل الإدارة لتفعيل اشتراكك في خطة <strong>( {{ user.grade }} )</strong>.</p>
+        <p style="color: #94a3b8; font-size: 14px; margin-top: 20px;">سيتم تفعيل حسابك وفتح الدروس قريباً جداً.</p>
+        <a href="/" class="btn">العودة للرئيسية</a>
+    </div>
+</body>
+</html>

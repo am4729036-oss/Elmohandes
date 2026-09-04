@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>اختر خطة الاشتراك | البشمهندس</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #0f172a; color: white; margin: 0; padding: 40px 20px; }
+        .container { max-width: 1000px; margin: auto; text-align: center; }
+        h2 { color: #0ea5e9; font-size: 32px; margin-bottom: 10px; }
+        .section-title { margin-top: 50px; margin-bottom: 20px; font-size: 24px; color: #38bdf8; border-bottom: 2px solid #38bdf8; display: inline-block; padding-bottom: 5px; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        
+        .plan-card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px 20px;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* تأثيرات الكروت المتاحة فقط */
+        .plan-card.available:hover { transform: translateY(-10px); border-color: #0ea5e9; box-shadow: 0 10px 20px rgba(14, 165, 233, 0.2); }
+        
+        /* تأثيرات الكروت غير المتاحة */
+        .plan-card.unavailable {
+            opacity: 0.5;
+            background: rgba(15, 23, 42, 0.9);
+            border-color: rgba(255, 255, 255, 0.05);
+            pointer-events: none; /* يمنع الضغط عليها نهائياً */
+        }
+        
+        .plan-card h3 { font-size: 22px; margin: 0 0 15px 0; }
+        .desc { font-size: 14px; color: #cbd5e1; line-height: 1.6; margin-bottom: 25px; min-height: 50px; }
+        .price { font-size: 36px; font-weight: bold; color: #10b981; margin-bottom: 25px; }
+        .price span { font-size: 16px; color: #94a3b8; font-weight: normal; }
+        
+        .btn {
+            background: #0ea5e9; color: white; border: none; padding: 12px 0; width: 100%;
+            border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s;
+            font-family: 'Cairo', sans-serif;
+        }
+        .plan-card.available .btn:hover { background: #0284c7; }
+        
+        /* زرار الكارت غير المتاح */
+        .plan-card.unavailable .btn {
+            background: #334155;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+        
+        .badge { position: absolute; top: 15px; left: -35px; background: #ef4444; color: white; padding: 5px 40px; transform: rotate(-45deg); font-size: 12px; font-weight: bold; }
+        .badge-unavailable { position: absolute; top: 15px; right: -35px; background: #64748b; color: white; padding: 5px 40px; transform: rotate(45deg); font-size: 12px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>اختر خطة الاشتراك المناسبة</h2>
+        <p style="color: #94a3b8; margin-bottom: 40px;">اختر الصف الدراسي الخاص بك لإتمام عملية التسجيل والدفع</p>
+
+        <div class="section-title">المرحلة الابتدائية</div>
+        <div class="grid">
+            
+            <div class="plan-card unavailable">
+                <div class="badge-unavailable">قريباً</div>
+                <h3 style="color: #64748b;">الصف الرابع الابتدائي</h3>
+                <p class="desc">تأسيس قوي في النظام الجديد، شرح مبسط يخلي طفلك يفهم ويحب الأرقام بدون أي تعقيد.</p>
+                <div class="price" style="color: #64748b;">--- <span>جنيه / الشهر</span></div>
+                <button type="button" class="btn" disabled>غير متوفر حالياً</button>
+            </div>
+
+            <div class="plan-card available">
+                <h3>الصف الخامس الابتدائي</h3>
+                <p class="desc">تطوير مهارات التفكير المنطقي، وتدريب مستمر على حل المسائل بثقة وسهولة تامة.</p>
+                <div class="price">350 <span>جنيه / الشهر</span></div>
+                <form action="/select_plan" method="POST">
+                    <input type="hidden" name="grade" value="خامسة ابتدائي">
+                    <button type="submit" class="btn">اشترك الآن</button>
+                </form>
+            </div>
+
+            <div class="plan-card available" style="border-color: #f59e0b;">
+                <div class="badge" style="background: #f59e0b;">شهادة</div>
+                <h3>الصف السادس الابتدائي</h3>
+                <p class="desc">استعداد كامل للمرحلة الإعدادية، مراجعات شاملة وامتحانات دورية تضمن التفوق.</p>
+                <div class="price">400 <span>جنيه / الشهر</span></div>
+                <form action="/select_plan" method="POST">
+                    <input type="hidden" name="grade" value="سادسة ابتدائي">
+                    <button type="submit" class="btn" style="background: #f59e0b; color: #0f172a;">اشترك الآن</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="section-title" style="color: #64748b; border-color: rgba(255,255,255,0.1);">المرحلة الإعدادية</div>
+        <div class="grid">
+            
+            <div class="plan-card unavailable">
+                <h3 style="color: #64748b;">الصف الأول الإعدادي</h3>
+                <p class="desc">بداية قوية لمرحلة جديدة، شرح تفصيلي لأساسيات الجبر والهندسة خطوة بخطوة.</p>
+                <div class="price" style="color: #64748b;">--- <span>جنيه / الشهر</span></div>
+                <button type="button" class="btn" disabled>غير متوفر حالياً</button>
+            </div>
+
+            <div class="plan-card unavailable">
+                <h3 style="color: #64748b;">الصف الثاني الإعدادي</h3>
+                <p class="desc">تعمق في النظريات والقوانين، وتدريب مكثف على التعامل مع أصعب المسائل بمهارة.</p>
+                <div class="price" style="color: #64748b;">--- <span>جنيه / الشهر</span></div>
+                <button type="button" class="btn" disabled>غير متوفر حالياً</button>
+            </div>
+
+            <div class="plan-card unavailable">
+                <h3 style="color: #64748b;">الصف الثالث الإعدادي</h3>
+                <p class="desc">تجهيز متكامل للشهادة الإعدادية، مراجعات نهائية وتوقعات تضمن لك الدرجة النهائية.</p>
+                <div class="price" style="color: #64748b;">--- <span>جنيه / الشهر</span></div>
+                <button type="button" class="btn" disabled>غير متوفر حالياً</button>
+            </div>
+            
+        </div>
+    </div>
+</body>
+</html>
